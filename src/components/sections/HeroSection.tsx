@@ -1,254 +1,191 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { COMPANY } from '@/data'
+import { ArrowRight, CheckCircle } from 'lucide-react'
+import { COMPANY, STATS } from '@/data'
 import { PhoneMockup } from '@/components/ui/PhoneMockup'
 
-gsap.registerPlugin(ScrollTrigger)
-
-/* --- Animation variants --- */
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
 }
-const wordItem = {
-  hidden: { opacity: 0, y: 20, filter: 'blur(8px)' },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-}
-const ctaItem = {
-  hidden: { opacity: 0, scale: 0.9, y: 10 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
-}
-const badgeVariant = {
-  hidden: { opacity: 0, scale: 0 },
-  visible: (delay: number) => ({
-    opacity: 1,
-    scale: 1,
-    transition: { type: 'spring' as const, stiffness: 260, damping: 20, delay },
-  }),
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
 }
 
-/* --- Deterministic seeded pseudo-random ---
- * Uses Math.sin so values are IDENTICAL on server and client.
- * This fixes the React hydration "Prop style did not match" warning
- * that was caused by Math.random() producing different values each run.
- */
-function seeded(seed: number): number {
-  const x = Math.sin(seed + 1) * 10000
-  return x - Math.floor(x)
-}
-
-/* --- Particles (all values pre-computed deterministically so SSR === CSR) --- */
-const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
-  id: i,
-  x: seeded(i * 7 + 0) * 100,
-  y: seeded(i * 7 + 1) * 100,
-  size: seeded(i * 7 + 2) * 4 + 2,
-  duration: seeded(i * 7 + 3) * 4 + 3,
-  delay: seeded(i * 7 + 4) * 2,
-  // Pre-computed animate keyframe offsets (replaces inline Math.random() in animate prop)
-  ax1: seeded(i * 7 + 5) * 60 - 30,
-  ay1: seeded(i * 7 + 6) * 60 - 30,
-  ax2: seeded(i * 7 + 9) * 60 - 30,
-  ay2: seeded(i * 7 + 10) * 60 - 30,
-}))
+const HIGHLIGHTS = [
+  'Paiements & Transferts',
+  'Assurances instantanées',
+  'Billetterie aérienne',
+]
 
 export function HeroSection() {
-  const orbRef = useRef<HTMLDivElement>(null)
-  const circleOuterRef = useRef<SVGSVGElement>(null)
-  const circleInnerRef = useRef<SVGSVGElement>(null)
-  const parallaxOrbsRef = useRef<HTMLDivElement>(null)
-
-  /* -- Parallax orbs on mousemove -- */
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (orbRef.current) {
-        const x = (e.clientX / window.innerWidth - 0.5) * 40
-        const y = (e.clientY / window.innerHeight - 0.5) * 40
-        gsap.to(orbRef.current.children, {
-          x, y, duration: 1.2, ease: 'power2.out', stagger: 0.06,
-        })
-      }
-      if (parallaxOrbsRef.current) {
-        const orbs = parallaxOrbsRef.current.children
-        const x = (e.clientX / window.innerWidth - 0.5) * 40
-        const y = (e.clientY / window.innerHeight - 0.5) * 40
-        gsap.to(orbs[0], { x: x * 0.5, y: y * 0.5, duration: 1.5, ease: 'power2.out' })
-        gsap.to(orbs[1], { x: x * -0.3, y: y * -0.3, duration: 1.8, ease: 'power2.out' })
-        gsap.to(orbs[2], { x: x * 0.7, y: y * 0.7, duration: 1.0, ease: 'power2.out' })
-      }
-    }
-    window.addEventListener('mousemove', onMove)
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [])
-
-  /* -- GSAP rotating circles -- */
-  useEffect(() => {
-    if (circleOuterRef.current) {
-      gsap.to(circleOuterRef.current, {
-        rotation: 360, duration: 20, repeat: -1, ease: 'none', transformOrigin: '50% 50%',
-      })
-    }
-    if (circleInnerRef.current) {
-      gsap.to(circleInnerRef.current, {
-        rotation: -360, duration: 12, repeat: -1, ease: 'none', transformOrigin: '50% 50%',
-      })
-    }
-  }, [])
-
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary via-[#073552] to-[#0a4060] pt-28 pb-16 px-6"
+      className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-16 px-6"
+      style={{ background: 'linear-gradient(160deg, #f0f7f8 0%, #ffffff 50%, #e8f4f5 100%)' }}
     >
-      {/* Float keyframes */}
-      <style>{`
-        @keyframes float-b {
-          0%,100% { transform: translateY(0px); }
-          50%      { transform: translateY(-14px); }
-        }
-        @keyframes float-phone {
-          0%,100% { transform: translateY(0px); }
-          50%      { transform: translateY(-8px); }
-        }
-        .animate-float-b     { animation: float-b 4s ease-in-out infinite 0.6s; }
-        .animate-float-phone { animation: float-phone 5s ease-in-out infinite; }
-      `}</style>
-
-      {/* -- Global ambient orbs -- */}
-      <div ref={orbRef} className="pointer-events-none absolute inset-0">
-        <div className="absolute top-[-10%] right-[-8%] w-[520px] h-[520px] rounded-full bg-action/15 blur-[100px]" />
-        <div className="absolute bottom-0 left-[-5%] w-[400px] h-[400px] rounded-full bg-secondary/10 blur-[80px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-action/10 blur-[70px]" />
-      </div>
-
-      {/* -- 20 Particles -- */}
+      {/* Subtle decorative shapes */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {PARTICLES.map((p) => (
-          <motion.div
-            key={p.id}
-            className="absolute rounded-full"
-            style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              width: p.size,
-              height: p.size,
-              backgroundColor: 'rgba(68,156,161,0.4)',
-            }}
-            animate={{
-              x: [0, p.ax1, p.ax2, 0],
-              y: [0, p.ay1, p.ay2, 0],
-              opacity: [0.3, 0.8, 0.5, 0.3],
-            }}
-            transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        ))}
+        <div
+          className="absolute top-[-80px] right-[-80px] w-[500px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(68,156,161,0.12) 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(5,38,59,0.06) 0%, transparent 70%)' }}
+        />
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(#05263B 1px, transparent 1px), linear-gradient(90deg, #05263B 1px, transparent 1px)`,
+            backgroundSize: '60px 60px',
+          }}
+        />
       </div>
 
-      {/* -- Main 2-col layout -- */}
       <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-        {/* -- LEFT COLUMN -- */}
+        {/* ── LEFT COLUMN ── */}
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-start text-left justify-center"
+          className="flex flex-col items-start text-left"
         >
+          {/* Badge */}
+          <motion.div variants={fadeUp}>
+            <span className="inline-flex items-center gap-2 bg-action/10 text-action text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-6 border border-action/20">
+              ✦ {COMPANY.award}
+            </span>
+          </motion.div>
 
+          {/* Headline */}
           <motion.h1
-            variants={stagger}
-            className="font-syne font-extrabold text-white leading-[1.06] tracking-tight text-4xl md:text-5xl lg:text-6xl mb-6"
+            variants={fadeUp}
+            className="font-syne font-extrabold text-primary leading-[1.08] tracking-tight text-4xl md:text-5xl lg:text-6xl mb-6"
           >
-            {['Tous', 'vos', 'services', 'essentiels,'].map((word, i) => (
-              <motion.span key={i} variants={wordItem} className="inline-block mr-[0.35em]">
-                {word}
-              </motion.span>
-            ))}
-            <br className="hidden sm:block" />
-            {['un', 'seul', 'point', "d'accès"].map((word, i) => (
-              <motion.span key={`a-${i}`} variants={wordItem} className="inline-block mr-[0.35em] text-action">
-                {word}
-              </motion.span>
-            ))}
+            Tous vos services{' '}
+            <span className="relative inline-block">
+              <span className="relative z-10" style={{ color: '#449CA1' }}>essentiels</span>
+              <span
+                className="absolute -bottom-1 left-0 right-0 h-[6px] rounded-full opacity-30"
+                style={{ background: '#449CA1' }}
+              />
+            </span>
+            ,<br />
+            <span className="text-primary">un seul accès.</span>
           </motion.h1>
 
-          <motion.p variants={wordItem} className="text-white/60 text-lg md:text-xl font-light leading-relaxed max-w-xl mb-10">
-            Paiements, wallet, assurances et bornes interactives – accessibles depuis votre mobile,
+          {/* Subtitle */}
+          <motion.p variants={fadeUp} className="text-slate-500 text-lg md:text-xl leading-relaxed max-w-xl mb-8">
+            Paiements, wallet, assurances et bornes interactives — accessibles depuis votre mobile,
             un point partenaire ou une borne, partout au Sénégal.
           </motion.p>
 
-          {/* CTA */}
-          <motion.div variants={stagger} className="flex flex-wrap gap-4 mb-8">
-            <motion.a
-              href="https://lemultiservice.sn"
-              target="_blank"
-              rel="noopener noreferrer"
-              variants={ctaItem}
-              whileHover={{ scale: 1.05 }}
+          {/* Highlights */}
+          <motion.ul variants={stagger} className="flex flex-col gap-3 mb-10">
+            {HIGHLIGHTS.map((h) => (
+              <motion.li key={h} variants={fadeUp} className="flex items-center gap-3 text-slate-700 font-medium text-sm">
+                <CheckCircle size={18} className="text-action flex-shrink-0" />
+                {h}
+              </motion.li>
+            ))}
+          </motion.ul>
+
+          {/* CTAs */}
+          <motion.div variants={fadeUp} className="flex flex-wrap gap-4 mb-12">
+            <motion.button
+              whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.97 }}
-              className="px-8 py-4 bg-white/10 border border-white/25 text-white font-semibold text-sm uppercase tracking-widest rounded-btn backdrop-blur-sm hover:bg-white/15 transition-all duration-200 inline-block"
+              onClick={() => {
+                const el = document.getElementById('services')
+                if (el) el.scrollIntoView({ behavior: 'smooth' })
+              }}
+              className="inline-flex items-center gap-2 px-7 py-4 rounded-btn font-semibold text-sm text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-200"
+              style={{ background: '#05263B' }}
             >
-              Découvrir la plateforme
-            </motion.a>
+              Découvrir nos services
+              <ArrowRight size={16} />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => {
+                const el = document.getElementById('bornes')
+                if (el) el.scrollIntoView({ behavior: 'smooth' })
+              }}
+              className="inline-flex items-center gap-2 px-7 py-4 rounded-btn font-semibold text-sm border-2 text-primary hover:bg-primary/5 transition-all duration-200"
+              style={{ borderColor: '#05263B' }}
+            >
+              Trouver une borne
+            </motion.button>
           </motion.div>
 
+          {/* Stats strip */}
+          <motion.div variants={fadeUp} className="flex flex-wrap gap-6">
+            {STATS.map((s) => (
+              <div key={s.label} className="text-center">
+                <div className="font-syne font-extrabold text-2xl text-primary">
+                  {s.value}{s.suffix}
+                </div>
+                <div className="text-slate-500 text-xs mt-0.5 max-w-[120px] leading-tight">{s.label}</div>
+              </div>
+            ))}
+          </motion.div>
         </motion.div>
 
-        {/* -- RIGHT COLUMN : phone mockup + animations -- */}
+        {/* ── RIGHT COLUMN : phone ── */}
         <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="relative flex items-center justify-center min-h-[520px]"
+          initial={{ opacity: 0, x: 40, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="relative flex items-center justify-center min-h-[480px]"
         >
-          {/* -- Grand spot lumineux blanc/turquoise -- */}
+          {/* Glow behind phone */}
           <div
-            className="pointer-events-none absolute"
+            className="absolute w-[380px] h-[380px] rounded-full"
             style={{
-              width: 600,
-              height: 600,
-              borderRadius: '50%',
-              background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.45) 25%, rgba(68,156,161,0.35) 50%, transparent 72%)',
-              filter: 'blur(52px)',
+              background: 'radial-gradient(circle, rgba(68,156,161,0.20) 0%, transparent 70%)',
+              filter: 'blur(40px)',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              zIndex: 0,
             }}
           />
-          {/* Parallax orbs */}
-          <div ref={parallaxOrbsRef} className="pointer-events-none absolute inset-0">
-            <div className="absolute top-10 left-10 w-48 h-48 rounded-full bg-action/20 blur-[60px]" />
-            <div className="absolute bottom-10 right-10 w-36 h-36 rounded-full bg-secondary/15 blur-[50px]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-action/30 blur-[40px]" />
-          </div>
-
-          {/* Decorative spinning circles */}
-          <svg ref={circleOuterRef} className="pointer-events-none absolute" width="420" height="420" viewBox="0 0 420 420" fill="none">
-            <circle cx="210" cy="210" r="200" stroke="rgba(68,156,161,0.18)" strokeWidth="1.5" strokeDasharray="8 14" />
-          </svg>
-          <svg ref={circleInnerRef} className="pointer-events-none absolute" width="220" height="220" viewBox="0 0 220 220" fill="none">
-            <circle cx="110" cy="110" r="104" stroke="rgba(68,156,161,0.28)" strokeWidth="1.2" strokeDasharray="4 10" />
-          </svg>
-
-          {/* -- PHONE MOCKUP -- */}
+          {/* Card badges */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.88, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="animate-float-phone relative z-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="absolute top-10 -left-4 lg:left-0 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 border border-slate-100 z-20"
           >
-            <PhoneMockup />
+            <div className="w-9 h-9 rounded-full bg-action/10 flex items-center justify-center text-lg">💳</div>
+            <div>
+              <p className="text-xs font-bold text-slate-800">Paiement réussi</p>
+              <p className="text-xs text-action font-medium">+2 500 FCFA</p>
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="absolute bottom-12 -right-4 lg:right-0 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-3 border border-slate-100 z-20"
+          >
+            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-lg">🛡️</div>
+            <div>
+              <p className="text-xs font-bold text-slate-800">Attestation générée</p>
+              <p className="text-xs text-action font-medium">Instantanément</p>
+            </div>
           </motion.div>
 
+          <div className="relative z-10" style={{ animation: 'floatPhone 5s ease-in-out infinite' }}>
+            <PhoneMockup />
+          </div>
+          <style>{`@keyframes floatPhone { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }`}</style>
         </motion.div>
       </div>
     </section>

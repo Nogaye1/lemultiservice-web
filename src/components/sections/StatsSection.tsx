@@ -17,23 +17,33 @@ const TRACK = [...PARTNERS, ...PARTNERS, ...PARTNERS]
 
 export function StatsSection() {
   return (
-    <section id="stats" className="bg-slate-50 border-y border-slate-100 py-8 overflow-hidden">
+    <section id="stats" className="bg-white border-y border-slate-100 py-12 overflow-hidden">
 
-      {/* Fade edges */}
+      {/* Title */}
+      <div className="text-center mb-8 px-6">
+        <p className="text-xs font-bold uppercase tracking-widest text-action mb-1">Ils nous font confiance</p>
+        <h2 className="font-syne font-bold text-primary text-2xl md:text-3xl">Nos partenaires</h2>
+      </div>
+
+      {/* Marquee */}
       <div className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10"
-          style={{ background: 'linear-gradient(to right, #f8fafc, transparent)' }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10"
-          style={{ background: 'linear-gradient(to left, #f8fafc, transparent)' }} />
+        {/* Fade edges */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10"
+          style={{ background: 'linear-gradient(to right, #ffffff, transparent)' }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10"
+          style={{ background: 'linear-gradient(to left, #ffffff, transparent)' }} />
 
         <div
           className="flex items-center"
           style={{ animation: 'marqueeLeft 40s linear infinite', width: 'max-content', willChange: 'transform' }}
         >
           {TRACK.map((p, i) => (
-            <div key={i} className="flex-shrink-0 mx-3 w-24 h-24 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden flex items-center justify-center hover:shadow-md hover:scale-105 transition-all duration-200">
-              <div className="relative w-16 h-16">
-                <Image src={p.src} alt={p.name} fill className="object-contain" sizes="64px" />
+            <div
+              key={i}
+              className="flex-shrink-0 mx-3 w-28 h-20 rounded-xl bg-white border border-slate-200 shadow-sm overflow-hidden flex flex-col items-center justify-center hover:shadow-md hover:border-action/30 transition-all duration-200 px-2"
+            >
+              <div className="relative w-20 h-12">
+                <Image src={p.src} alt={p.name} fill className="object-contain" sizes="80px" />
               </div>
             </div>
           ))}
