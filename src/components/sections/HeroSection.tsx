@@ -1,0 +1,256 @@
+'use client'
+import { useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { COMPANY } from '@/data'
+import { PhoneMockup } from '@/components/ui/PhoneMockup'
+
+gsap.registerPlugin(ScrollTrigger)
+
+/* --- Animation variants --- */
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
+}
+const wordItem = {
+  hidden: { opacity: 0, y: 20, filter: 'blur(8px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+}
+const ctaItem = {
+  hidden: { opacity: 0, scale: 0.9, y: 10 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
+}
+const badgeVariant = {
+  hidden: { opacity: 0, scale: 0 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    scale: 1,
+    transition: { type: 'spring' as const, stiffness: 260, damping: 20, delay },
+  }),
+}
+
+/* --- Deterministic seeded pseudo-random ---
+ * Uses Math.sin so values are IDENTICAL on server and client.
+ * This fixes the React hydration "Prop style did not match" warning
+ * that was caused by Math.random() producing different values each run.
+ */
+function seeded(seed: number): number {
+  const x = Math.sin(seed + 1) * 10000
+  return x - Math.floor(x)
+}
+
+/* --- Particles (all values pre-computed deterministically so SSR === CSR) --- */
+const PARTICLES = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  x: seeded(i * 7 + 0) * 100,
+  y: seeded(i * 7 + 1) * 100,
+  size: seeded(i * 7 + 2) * 4 + 2,
+  duration: seeded(i * 7 + 3) * 4 + 3,
+  delay: seeded(i * 7 + 4) * 2,
+  // Pre-computed animate keyframe offsets (replaces inline Math.random() in animate prop)
+  ax1: seeded(i * 7 + 5) * 60 - 30,
+  ay1: seeded(i * 7 + 6) * 60 - 30,
+  ax2: seeded(i * 7 + 9) * 60 - 30,
+  ay2: seeded(i * 7 + 10) * 60 - 30,
+}))
+
+export function HeroSection() {
+  const orbRef = useRef<HTMLDivElement>(null)
+  const circleOuterRef = useRef<SVGSVGElement>(null)
+  const circleInnerRef = useRef<SVGSVGElement>(null)
+  const parallaxOrbsRef = useRef<HTMLDivElement>(null)
+
+  /* -- Parallax orbs on mousemove -- */
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (orbRef.current) {
+        const x = (e.clientX / window.innerWidth - 0.5) * 40
+        const y = (e.clientY / window.innerHeight - 0.5) * 40
+        gsap.to(orbRef.current.children, {
+          x, y, duration: 1.2, ease: 'power2.out', stagger: 0.06,
+        })
+      }
+      if (parallaxOrbsRef.current) {
+        const orbs = parallaxOrbsRef.current.children
+        const x = (e.clientX / window.innerWidth - 0.5) * 40
+        const y = (e.clientY / window.innerHeight - 0.5) * 40
+        gsap.to(orbs[0], { x: x * 0.5, y: y * 0.5, duration: 1.5, ease: 'power2.out' })
+        gsap.to(orbs[1], { x: x * -0.3, y: y * -0.3, duration: 1.8, ease: 'power2.out' })
+        gsap.to(orbs[2], { x: x * 0.7, y: y * 0.7, duration: 1.0, ease: 'power2.out' })
+      }
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  /* -- GSAP rotating circles -- */
+  useEffect(() => {
+    if (circleOuterRef.current) {
+      gsap.to(circleOuterRef.current, {
+        rotation: 360, duration: 20, repeat: -1, ease: 'none', transformOrigin: '50% 50%',
+      })
+    }
+    if (circleInnerRef.current) {
+      gsap.to(circleInnerRef.current, {
+        rotation: -360, duration: 12, repeat: -1, ease: 'none', transformOrigin: '50% 50%',
+      })
+    }
+  }, [])
+
+  return (
+    <section
+      id="hero"
+      className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-primary via-[#073552] to-[#0a4060] pt-28 pb-16 px-6"
+    >
+      {/* Float keyframes */}
+      <style>{`
+        @keyframes float-b {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-14px); }
+        }
+        @keyframes float-phone {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-8px); }
+        }
+        .animate-float-b     { animation: float-b 4s ease-in-out infinite 0.6s; }
+        .animate-float-phone { animation: float-phone 5s ease-in-out infinite; }
+      `}</style>
+
+      {/* -- Global ambient orbs -- */}
+      <div ref={orbRef} className="pointer-events-none absolute inset-0">
+        <div className="absolute top-[-10%] right-[-8%] w-[520px] h-[520px] rounded-full bg-action/15 blur-[100px]" />
+        <div className="absolute bottom-0 left-[-5%] w-[400px] h-[400px] rounded-full bg-secondary/10 blur-[80px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-action/10 blur-[70px]" />
+      </div>
+
+      {/* -- 20 Particles -- */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {PARTICLES.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full"
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: p.size,
+              height: p.size,
+              backgroundColor: 'rgba(68,156,161,0.4)',
+            }}
+            animate={{
+              x: [0, p.ax1, p.ax2, 0],
+              y: [0, p.ay1, p.ay2, 0],
+              opacity: [0.3, 0.8, 0.5, 0.3],
+            }}
+            transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        ))}
+      </div>
+
+      {/* -- Main 2-col layout -- */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+        {/* -- LEFT COLUMN -- */}
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-start text-left justify-center"
+        >
+
+          <motion.h1
+            variants={stagger}
+            className="font-syne font-extrabold text-white leading-[1.06] tracking-tight text-4xl md:text-5xl lg:text-6xl mb-6"
+          >
+            {['Tous', 'vos', 'services', 'essentiels,'].map((word, i) => (
+              <motion.span key={i} variants={wordItem} className="inline-block mr-[0.35em]">
+                {word}
+              </motion.span>
+            ))}
+            <br className="hidden sm:block" />
+            {['un', 'seul', 'point', "d'accès"].map((word, i) => (
+              <motion.span key={`a-${i}`} variants={wordItem} className="inline-block mr-[0.35em] text-action">
+                {word}
+              </motion.span>
+            ))}
+          </motion.h1>
+
+          <motion.p variants={wordItem} className="text-white/60 text-lg md:text-xl font-light leading-relaxed max-w-xl mb-10">
+            Paiements, wallet, assurances et bornes interactives – accessibles depuis votre mobile,
+            un point partenaire ou une borne, partout au Sénégal.
+          </motion.p>
+
+          {/* CTA */}
+          <motion.div variants={stagger} className="flex flex-wrap gap-4 mb-8">
+            <motion.a
+              href="https://lemultiservice.sn"
+              target="_blank"
+              rel="noopener noreferrer"
+              variants={ctaItem}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              className="px-8 py-4 bg-white/10 border border-white/25 text-white font-semibold text-sm uppercase tracking-widest rounded-btn backdrop-blur-sm hover:bg-white/15 transition-all duration-200 inline-block"
+            >
+              Découvrir la plateforme
+            </motion.a>
+          </motion.div>
+
+        </motion.div>
+
+        {/* -- RIGHT COLUMN : phone mockup + animations -- */}
+        <motion.div
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="relative flex items-center justify-center min-h-[520px]"
+        >
+          {/* -- Grand spot lumineux blanc/turquoise -- */}
+          <div
+            className="pointer-events-none absolute"
+            style={{
+              width: 600,
+              height: 600,
+              borderRadius: '50%',
+              background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.45) 25%, rgba(68,156,161,0.35) 50%, transparent 72%)',
+              filter: 'blur(52px)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 0,
+            }}
+          />
+          {/* Parallax orbs */}
+          <div ref={parallaxOrbsRef} className="pointer-events-none absolute inset-0">
+            <div className="absolute top-10 left-10 w-48 h-48 rounded-full bg-action/20 blur-[60px]" />
+            <div className="absolute bottom-10 right-10 w-36 h-36 rounded-full bg-secondary/15 blur-[50px]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-action/30 blur-[40px]" />
+          </div>
+
+          {/* Decorative spinning circles */}
+          <svg ref={circleOuterRef} className="pointer-events-none absolute" width="420" height="420" viewBox="0 0 420 420" fill="none">
+            <circle cx="210" cy="210" r="200" stroke="rgba(68,156,161,0.18)" strokeWidth="1.5" strokeDasharray="8 14" />
+          </svg>
+          <svg ref={circleInnerRef} className="pointer-events-none absolute" width="220" height="220" viewBox="0 0 220 220" fill="none">
+            <circle cx="110" cy="110" r="104" stroke="rgba(68,156,161,0.28)" strokeWidth="1.2" strokeDasharray="4 10" />
+          </svg>
+
+          {/* -- PHONE MOCKUP -- */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="animate-float-phone relative z-10"
+          >
+            <PhoneMockup />
+          </motion.div>
+
+        </motion.div>
+      </div>
+    </section>
+  )
+}
