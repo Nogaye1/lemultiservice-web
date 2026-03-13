@@ -1,21 +1,15 @@
 import Image from 'next/image'
 
 const PARTNERS = [
+  { src: '/images/partenaires/intech%20group.png', name: 'Intech Group' },
+  { src: '/images/partenaires/bictorys.png', name: 'Bictorys' },
   { src: '/images/partenaires/wave.png', name: 'Wave' },
   { src: '/images/partenaires/orange-money.png', name: 'Orange Money' },
-  { src: '/images/partenaires/BCEAO.png', name: 'BCEAO' },
-  { src: '/images/partenaires/CCA%20ASSURANCE.png', name: 'CCA Assurance' },
-  { src: '/images/partenaires/La%20providence.png', name: 'La Providence' },
-  { src: '/images/partenaires/api%20amadeus%20.png', name: 'Amadeus API' },
-  { src: '/images/partenaires/aws.png', name: 'AWS' },
-  { src: '/images/partenaires/bictorys.png', name: 'Bictorys' },
-  { src: '/images/partenaires/cap%20assurance%20.png', name: 'Cap Assurance' },
-  { src: '/images/partenaires/intech%20group.png', name: 'Intech Group' },
-  { src: '/images/partenaires/intouch.png', name: 'InTouch' },
-  { src: '/images/partenaires/legs.png', name: 'LEGS' },
-  { src: '/images/partenaires/sn%20num.png', name: 'SN Num' },
-  { src: '/images/partenaires/vip.png', name: 'VIP' },
   { src: '/images/partenaires/yoff.png', name: 'Yoff' },
+  { src: '/images/partenaires/vip.png', name: 'VIP Assurance' },
+  { src: '/images/partenaires/La%20providence.png', name: 'Providence' },
+  { src: '/images/partenaires/legs.png', name: 'LEGS' },
+  { src: '/images/partenaires/sn%20num.png', name: 'SN Numérique' },
 ]
 
 const TRACK = [...PARTNERS, ...PARTNERS, ...PARTNERS]

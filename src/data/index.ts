@@ -23,7 +23,7 @@ export const SCREENSHOTS = [
   { src: '/images/cap9.jpg', label: 'Récapitulatif', alt: 'Avant paiement' },
   { src: '/images/cap10.jpg', label: 'Paiement sécurisé', alt: 'Wave / Orange Money' },
 ]
-export const PARTNERS = ['Providence Assurance', 'VIP Assurance', 'CAP Assurance', 'CCA Assurance', 'Wave', 'Orange Money', 'API Amadeus', 'Bictorys', 'Intouch', 'Intech Group', 'BCEAO', 'AWS']
+export const PARTNERS = ['Intech Group', 'Bictorys', 'Wave', 'Orange Money', 'Yoff', 'VIP Assurance', 'Providence', 'Askia Assurance', 'LEGS', 'SN Numérique']
 export const TESTIMONIALS = [
   { quote: 'LeMultiservice a révolutionné la gestion des assurances de mes clients. Tout se fait en quelques clics depuis la borne.', author: 'Amadou Diallo', role: 'Gérant de boutique, Dakar', initials: 'AD' },
   { quote: 'Le wallet centralisé nous a permis de simplifier toutes nos opérations. La plateforme est intuitive et fiable.', author: 'Fatou Mbaye', role: "Directrice d'agence, Dakar", initials: 'FM' },
