@@ -8,6 +8,7 @@ const PARTNERS = [
   { src: '/images/partenaires/yoff.png', name: 'Yoff' },
   { src: '/images/partenaires/vip.png', name: 'VIP Assurance' },
   { src: '/images/partenaires/La%20providence.png', name: 'Providence' },
+  { src: '/images/partenaires/askia.png', name: 'Askia Assurance' },
   { src: '/images/partenaires/legs.png', name: 'LEGS' },
   { src: '/images/partenaires/sn%20num.png', name: 'SN Numérique' },
 ]
